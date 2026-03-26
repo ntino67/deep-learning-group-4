@@ -18,10 +18,14 @@ def preprocessing(
     display_info(df)
     display_visualization(df)
 
+    df.to_csv("./data/cleaned_dataset.csv", index=False)
+    print("Saved the cleaned dataset.")
+
     X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(df)
 
     X_train_scaled, X_val_scaled, X_test_scaled = scale_features(X_train, X_val, X_test)
 
+    print("\nFinished the preprocessing.")
     return X_train_scaled, X_val_scaled, X_test_scaled, y_train, y_val, y_test
 
 
@@ -35,14 +39,14 @@ def cleaning_dataset(dataset: pd.DataFrame) -> pd.DataFrame:
     df_null: int = df.isnull().sum().sum()
     print(f"Null values in the dataset: {df_null}")
     if df_null > 0:
-        df.fillna(df.mean(), inplace=True)
-        print("Replaced the missing cells with the mean of their columns.")
+        df.dropna(inplace=True)
+        print("Dropped rows with missing values.")
 
     df_dup: int = df.duplicated().sum()
     print(f"Duplicated values in the dataset: {df_dup}")
     if df_dup > 0:
         df.drop_duplicates(inplace=True)
-        print("Dropped the duplicated rows")
+        print("Dropped the duplicated rows.")
 
     binary_cols = [
         "Diabetes",
@@ -72,7 +76,7 @@ def cleaning_dataset(dataset: pd.DataFrame) -> pd.DataFrame:
     lower = q1 - 1.5 * iqr
     upper = q3 + 1.5 * iqr
     clean_df: pd.DataFrame = df[(df["BMI"] >= lower) & (df["BMI"] <= upper)]
-    print("Cleaned dataset")
+    print("Cleaned dataset.")
     visualize_outliers(clean_df)
     return clean_df
 
@@ -134,7 +138,7 @@ def plot_target_distribution(dataset: pd.DataFrame) -> None:
     plt.title("Outcome Proportionality")
     plt.show()
     print(
-        "The target variable is not balanced as you can see with this pie chart. This will affect the model training and evaluation"
+        "The target variable is not balanced as you can see with this pie chart. This will affect the model training and evaluation."
     )
 
 
@@ -163,8 +167,8 @@ def scale_features(
     X_val = scaler.transform(val)
     X_test = scaler.transform(test)
 
-    print(f"Training set: {X_train.shape[0]} samples")
-    print(f"Validation set: {X_val.shape[0]} samples")
-    print(f"Test set: {X_test.shape[0]} samples")
+    print(f"Training set: {X_train.shape[0]} samples.")
+    print(f"Validation set: {X_val.shape[0]} samples.")
+    print(f"Test set: {X_test.shape[0]} samples.")
 
     return X_train, X_val, X_test
