@@ -7,7 +7,7 @@ df = pd.read_csv(file_path)
 
 
 def main() -> None:
-    preprocessing.preprocessing(df)
+    X_train, X_val, X_test, y_train, y_val, y_test = preprocessing.preprocessing(df)
 
 
 if __name__ == "__main__":

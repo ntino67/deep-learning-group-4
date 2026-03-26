@@ -1,19 +1,28 @@
-from typing import List
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
-def preprocessing(dataset: pd.DataFrame) -> None:
+def preprocessing(
+    dataset: pd.DataFrame,
+) -> Tuple[
+    np.ndarray, np.ndarray, np.ndarray, pd.DataFrame, pd.DataFrame, pd.DataFrame
+]:
     print("Cleaning the dataset...")
     df = cleaning_dataset(dataset)
     display_info(df)
     display_visualization(df)
 
-    X = df.drop(columns=["Diabetes"])
-    y = df["Diabetes"]
+    X_train, X_val, X_test, y_train, y_val, y_test = split_dataset(df)
+
+    X_train_scaled, X_val_scaled, X_test_scaled = scale_features(X_train, X_val, X_test)
+
+    return X_train_scaled, X_val_scaled, X_test_scaled, y_train, y_val, y_test
 
 
 def cleaning_dataset(dataset: pd.DataFrame) -> pd.DataFrame:
@@ -106,3 +115,34 @@ def plot_target_distribution(dataset: pd.DataFrame) -> None:
     print(
         "The target variable is not balanced as you can see with this pie chart. This will affect the model training and evaluation"
     )
+
+
+def split_dataset(
+    df: pd.DataFrame,
+) -> Tuple[pd.DataFrame, ...]:
+    X = df.drop(columns=["Diabetes"])
+    y = df["Diabetes"]
+
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp, test_size=0.5, random_state=42
+    )
+
+    return X_train, X_val, X_test, y_train, y_val, y_test
+
+
+def scale_features(
+    train: pd.DataFrame, val: pd.DataFrame, test: pd.DataFrame
+) -> Tuple[np.ndarray, ...]:
+    scaler = StandardScaler()
+    X_train = scaler.fit_transform(train)
+    X_val = scaler.transform(val)
+    X_test = scaler.transform(test)
+
+    print(f"Training set: {X_train.shape[0]} samples")
+    print(f"Validation set: {X_val.shape[0]} samples")
+    print(f"Test set: {X_test.shape[0]} samples")
+
+    return X_train, X_val, X_test
