@@ -1,14 +1,29 @@
 from typing import List
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import seaborn as sns
 
 
 def preprocessing(dataset: pd.DataFrame) -> None:
+    df = cleaning_dataset(dataset)
+    display_info(df)
+
+    X = df.drop(columns=["Diabetes"])
+    y = df["Diabetes"]
+
+
+def cleaning_dataset(dataset: pd.DataFrame) -> pd.DataFrame:
     bin_diabetes = dataset["Diabetes_012"].map(lambda x: 1.0 if x == 2.0 else 0.0)
     dataset["Diabetes"] = bin_diabetes
     dataset.drop(columns=["Diabetes_012"], inplace=True)
-    display_info(dataset)
+
+    q1, q3 = np.percentile(dataset["BMI"], [25, 75])
+    iqr = q3 - q1
+    lower = q1 - 1.5 * iqr
+    upper = q3 + 1.5 * iqr
+    return dataset[(dataset["BMI"] >= lower) & (dataset["BMI"] <= upper)]
 
 
 def display_info(dataset: pd.DataFrame) -> None:
@@ -23,6 +38,21 @@ def display_info(dataset: pd.DataFrame) -> None:
     print("=" * 25 + " Visualize Outliers " + "=" * 25)
     visualize_outliers(dataset)
     print("(Plot)")
+    print("=" * 25 + " Correlation Heatmap " + "=" * 25)
+    correlation(dataset)
+    print("=" * 25 + " Target Variable Distribution " + "=" * 25)
+
+    plt.pie(
+        dataset["Diabetes"].value_counts(),
+        labels=["Diabetes", "Not Diabetes"],
+        autopct="%.f%%",
+        shadow=True,
+    )
+    plt.title("Outcome Proportionality")
+    plt.show()
+    print(
+        "The target variable is not balanced as you can see with this pie chart. This will affect the model training and evaluation"
+    )
 
 
 def visualize_outliers(dataset: pd.DataFrame) -> None:
@@ -40,3 +70,12 @@ def visualize_outliers(dataset: pd.DataFrame) -> None:
 
     plt.tight_layout()
     plt.show()
+
+
+def correlation(dataset: pd.DataFrame) -> None:
+    corr = dataset.corr()
+    plt.figure(dpi=130)
+    sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm")
+    plt.show()
+
+    print(corr["Diabetes"].sort_values(ascending=False))
