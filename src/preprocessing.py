@@ -44,6 +44,27 @@ def cleaning_dataset(dataset: pd.DataFrame) -> pd.DataFrame:
         df.drop_duplicates(inplace=True)
         print("Dropped the duplicated rows")
 
+    binary_cols = [
+        "Diabetes",
+        "HighBP",
+        "HighChol",
+        "CholCheck",
+        "Smoker",
+        "Stroke",
+        "HeartDiseaseorAttack",
+        "PhysActivity",
+        "Fruits",
+        "Veggies",
+        "HvyAlcoholConsump",
+        "AnyHealthcare",
+        "NoDocbcCost",
+        "DiffWalk",
+        "Sex",
+    ]
+    df[binary_cols] = df[binary_cols].astype(bool)
+    int_cols = ["GenHlth", "MentHlth", "PhysHlth", "Age", "Education", "Income"]
+    df[int_cols] = df[int_cols].astype(int)
+
     visualize_outliers(df)
     print("Removing the outliers...")
     q1, q3 = np.percentile(df["BMI"], [25, 75])
@@ -123,6 +144,7 @@ def split_dataset(
     X = df.drop(columns=["Diabetes"])
     y = df["Diabetes"]
 
+    # 80-10-10 split
     X_train, X_temp, y_train, y_temp = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
