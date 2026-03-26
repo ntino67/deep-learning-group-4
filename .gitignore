@@ -1,1 +1,4 @@
 *.csv
+.venv/
+*.egg-info/
+build/
