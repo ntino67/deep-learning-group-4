@@ -7,6 +7,7 @@ from sklearn.preprocessing import StandardScaler
 
 from src.cleaning import cleaning_dataset
 from src.eda import display_info, display_visualization, visualize_outliers
+from src.utils import _validate
 
 
 def preprocessing(
@@ -41,6 +42,8 @@ def preprocessing(
 
 
 def split_dataset(df: pd.DataFrame, target: str) -> Tuple[pd.DataFrame, ...]:
+    _validate(dataset=df, target=target)
+
     X = df.drop(columns=[target])
     y = df[target]
 

@@ -3,6 +3,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
+from src.utils import _validate
+
 
 def cleaning_dataset(
     dataset: pd.DataFrame,
@@ -13,7 +15,17 @@ def cleaning_dataset(
     int_cols: List[str],
     outlier_cols: List[str],
 ) -> pd.DataFrame:
+    _validate(
+        dataset=dataset,
+        source=source,
+        positive_value=positive_value,
+        int_cols=int_cols,
+        outlier_cols=outlier_cols,
+    )
+
     df = binarize_target(dataset, source, target, positive_value)
+
+    _validate(dataset=df, target=target, binary_cols=binary_cols)
 
     # Two sum because the first sum return a Series (count of null per column), the second one sums up all the nulls per column
     df_null: int = df.isnull().sum().sum()
@@ -48,6 +60,8 @@ def cleaning_dataset(
 def binarize_target(
     df: pd.DataFrame, source_col: str, target_col: str, positive_value: float
 ) -> pd.DataFrame:
+    _validate(dataset=df, source=source_col)
+
     df = df.copy()
     df[target_col] = df[source_col].map(lambda x: 1.0 if x == positive_value else 0.0)
     df.drop(columns=[source_col], inplace=True)

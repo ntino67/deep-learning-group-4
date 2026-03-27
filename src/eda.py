@@ -4,8 +4,12 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 
+from src.utils import _validate
+
 
 def display_info(dataset: pd.DataFrame, target: str) -> None:
+    _validate(dataset, target)
+
     print("=" * 25 + " Table " + "=" * 25)
     print(dataset.head())
     print("=" * 25 + " Summary " + "=" * 25)
@@ -17,6 +21,8 @@ def display_info(dataset: pd.DataFrame, target: str) -> None:
 
 
 def display_visualization(dataset: pd.DataFrame, target: str) -> None:
+    _validate(dataset, target)
+
     print("=" * 25 + " Correlation Heatmap " + "=" * 25)
     plot_correlation_heatmap(dataset)
     print("=" * 25 + " Target Variable Distribution " + "=" * 25)
@@ -44,12 +50,11 @@ def plot_target_distribution(dataset: pd.DataFrame, target: str) -> None:
     )
     plt.title("Outcome Proportionality")
     plt.show()
-    print(
-        "The target variable is not balanced as you can see with this pie chart. This will affect the model training and evaluation."
-    )
 
 
 def visualize_outliers(dataset: pd.DataFrame) -> None:
+    _validate(dataset)
+
     numerical: List[str] = ["BMI", "Age"]
 
     _, axs = plt.subplots(len(numerical), 1, figsize=(7, len(numerical) * 1.5), dpi=95)
