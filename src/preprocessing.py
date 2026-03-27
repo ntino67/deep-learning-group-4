@@ -16,14 +16,14 @@ def preprocessing(
     positive_value: float,
     binary_cols: List[str],
     int_cols: List[str],
-    outlier_col: str,
+    outlier_cols: List[str],
 ) -> Tuple[
     np.ndarray, np.ndarray, np.ndarray, pd.DataFrame, pd.DataFrame, pd.DataFrame
 ]:
     print("Cleaning the dataset...")
     visualize_outliers(dataset)
     df = cleaning_dataset(
-        dataset, source, target, positive_value, binary_cols, int_cols, outlier_col
+        dataset, source, target, positive_value, binary_cols, int_cols, outlier_cols
     )
     visualize_outliers(df)
     display_info(df, target)

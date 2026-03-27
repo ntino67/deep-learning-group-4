@@ -24,4 +24,4 @@ BINARY_COLS = [
 
 INT_COLS = ["GenHlth", "MentHlth", "PhysHlth", "Age", "Education", "Income"]
 
-OUTLIER_COL = ["BMI"]
+OUTLIER_COLS = ["BMI"]
