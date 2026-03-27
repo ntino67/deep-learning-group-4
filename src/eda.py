@@ -28,9 +28,6 @@ def plot_correlation_heatmap(dataset: pd.DataFrame) -> None:
     plt.figure(dpi=130)
     sns.heatmap(corr, annot=True, fmt=".2f", cmap="coolwarm")
     plt.show()
-    print(
-        "The correlation heatmap doesn't allow us to remove any column. The correlation between the different parameters are too low."
-    )
 
 
 def print_target_correlation(dataset: pd.DataFrame, target: str) -> None:
