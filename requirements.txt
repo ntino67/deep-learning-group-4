@@ -1,7 +1,8 @@
-tf-nightly
+tensorflow
 scikit-learn
 matplotlib
 pandas
 seaborn
 pytest
 kagglehub
+shap
