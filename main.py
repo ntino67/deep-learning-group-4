@@ -34,7 +34,19 @@ def main() -> None:
     X_train, X_val, X_test, y_train, y_val, y_test = preprocessing.preprocessing(
         df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
     )
-    create_model(X_train, X_val, y_train, y_val)
+
+    # Here a CLI part that allows us to choose the model type, dropout_rate or l2_lambda
+
+    create_model(
+        X_train,
+        X_val,
+        y_train,
+        y_val,
+        model_type,
+        "best-model.keras",
+        dropout_rate=dropout_rate,
+        l2_lambda=l2_lambda,
+    )
 
 
 if __name__ == "__main__":
