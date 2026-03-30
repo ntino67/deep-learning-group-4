@@ -18,17 +18,15 @@ def preprocessing(
     binary_cols: List[str],
     int_cols: List[str],
     outlier_cols: List[str],
-) -> Tuple[
-    np.ndarray, np.ndarray, np.ndarray, pd.DataFrame, pd.DataFrame, pd.DataFrame
-]:
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, pd.Series, pd.Series, pd.Series]:
     print("Cleaning the dataset...")
-    visualize_outliers(dataset)
+    # visualize_outliers(dataset)
     df = cleaning_dataset(
         dataset, source, target, positive_value, binary_cols, int_cols, outlier_cols
     )
-    visualize_outliers(df)
-    display_info(df, target)
-    display_visualization(df, target)
+    # visualize_outliers(df)
+    # display_info(df, target)
+    # display_visualization(df, target)
 
     df.to_csv("./data/cleaned_dataset.csv", index=False)
     print("Saved the cleaned dataset.")
@@ -41,7 +39,9 @@ def preprocessing(
     return X_train_scaled, X_val_scaled, X_test_scaled, y_train, y_val, y_test
 
 
-def split_dataset(df: pd.DataFrame, target: str) -> Tuple[pd.DataFrame, ...]:
+def split_dataset(
+    df: pd.DataFrame, target: str
+) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.Series, pd.Series, pd.Series]:
     _validate(dataset=df, target=target)
 
     X = df.drop(columns=[target])
