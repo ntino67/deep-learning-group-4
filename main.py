@@ -4,6 +4,11 @@ import shutil
 import kagglehub
 import pandas as pd
 
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+import absl.logging
+
+absl.logging.set_verbosity(absl.logging.ERROR)
+
 from src import preprocessing
 from src.config import (
     BINARY_COLS,
@@ -13,6 +18,7 @@ from src.config import (
     SOURCE,
     TARGET,
 )
+from src.model import create_model
 
 
 def main() -> None:
@@ -28,6 +34,7 @@ def main() -> None:
     X_train, X_val, X_test, y_train, y_val, y_test = preprocessing.preprocessing(
         df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
     )
+    create_model(X_train, X_val, X_test, y_train, y_val, y_test)
 
 
 if __name__ == "__main__":
