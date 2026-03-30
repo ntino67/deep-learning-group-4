@@ -1,3 +1,4 @@
+import argparse
 import os
 import shutil
 
@@ -35,18 +36,41 @@ def main() -> None:
         df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
     )
 
-    # Here a CLI part that allows us to choose the model type, dropout_rate or l2_lambda
-
+    args = parse_args()
     create_model(
         X_train,
         X_val,
         y_train,
         y_val,
-        model_type,
+        args.model_type,
         "best-model.keras",
-        dropout_rate=dropout_rate,
-        l2_lambda=l2_lambda,
+        dropout_rate=args.dropout_rate,
+        l2_lambda=args.l2_lambda,
     )
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Diabetes Prediction Model")
+    parser.add_argument(
+        "--model-type",
+        type=str,
+        default="base",
+        choices=["base", "dropout", "regularization", "complete"],
+        help="Model architecture to use",
+    )
+    parser.add_argument(
+        "--dropout-rate",
+        type=float,
+        default=0.3,
+        help="Dropout rate (used with dropout and complete models)",
+    )
+    parser.add_argument(
+        "--l2-lambda",
+        type=float,
+        default=0.001,
+        help="L2 regularization lambda (used with regularization and complete models)",
+    )
+    return parser.parse_args()
 
 
 if __name__ == "__main__":
