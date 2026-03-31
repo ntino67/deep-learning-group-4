@@ -1,0 +1,40 @@
+import os
+import pandas as pd
+import numpy as np
+import tensorflow as tf
+from sklearn.metrics import roc_auc_score, classification_report
+from src import preprocessing
+from src.config import *
+
+#lad stands for loading and data. i.e grabbing the original big csv file from the data folder. we push this dataframe through the preprocessing function to get our test variables. we are ignoring the train and validation outputs because we only care about the final test set on data the model has never seen before.
+print("loading data for final evaluation...")
+df = pd.read_csv("./data/diabetes_012_health_indicators_BRFSS2015.csv")
+_, _, X_test_scaled, _, _, y_test = preprocessing.preprocessing(
+    df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
+)
+
+#mvl stands for model version list. we put the names of the three saved keras files into this list so the script can just cycle through them automatically. this is way better than writing the same code three times.
+models = ["model_base.keras", "model_dropout.keras", "model_complete.keras"]
+
+#rge stands for running global evaluation. this is the main loop. if it finds the file it uses the keras load model function to bring the neural network back to life. then it runs the predict function which gives us a bunch of decimals between zero and one. these decimals represent the probability of someone having diabetes.
+print("\n" + "="*30)
+print("group 4 final evaluation results")
+print("="*30)
+
+for m_name in models:
+    if os.path.exists(m_name):
+        #loading the model takes some time because tensorflow has to reconstruct the layers and the weights.
+        current_model = tf.keras.models.load_model(m_name)
+        #we use verbose zero here so the screen doesnt get flooded with progress bars while it predicts.
+        y_probs = current_model.predict(X_test_scaled, verbose=0)
+        
+        #auc stands for area under the curve. a score of 0.5 means 50/50 and 1.0 means it is perfect.
+        auc_score = roc_auc_score(y_test, y_probs)
+        print(f"\narchitecture variant: {m_name}")
+        print(f"final test roc-auc: {auc_score:.4f}")
+        
+        #cr stands for classification report. we still want to see the precision and recall numbers. we are using a standard threshold of point five to turn the probabilities into hard zero or one categories.
+        y_pred = (y_probs > 0.5).astype(int)
+        print(classification_report(y_test, y_pred, target_names=["no diabetes", "diabetes"]))
+    else:
+        print(f"\nmissing file error: i could not find the file named {m_name} in this folder. double check your file explorer and make sure you renamed the best-model files correctly after each training run.")
