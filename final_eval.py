@@ -2,12 +2,13 @@ import os
 import pandas as pd
 import numpy as np
 import tensorflow as tf
-from sklearn.metrics import roc_auc_score, classification_report
+import matplotlib.pyplot as plt
+from sklearn.metrics import roc_auc_score, classification_report, roc_curve
 from src import preprocessing
 from src.config import *
 
 #lad stands for loading and data. i.e grabbing the original big csv file from the data folder. we push this dataframe through the preprocessing function to get our test variables. we are ignoring the train and validation outputs because we only care about the final test set on data the model has never seen before.
-print("loading data for final evaluation...")
+print("loading data for evaluation")
 df = pd.read_csv("./data/diabetes_012_health_indicators_BRFSS2015.csv")
 _, _, X_test_scaled, _, _, y_test = preprocessing.preprocessing(
     df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
@@ -17,9 +18,8 @@ _, _, X_test_scaled, _, _, y_test = preprocessing.preprocessing(
 models = ["model_base.keras", "model_dropout.keras", "model_complete.keras"]
 
 #rge stands for running global evaluation. this is the main loop. if it finds the file it uses the keras load model function to bring the neural network back to life. then it runs the predict function which gives us a bunch of decimals between zero and one. these decimals represent the probability of someone having diabetes.
-print("\n" + "="*30)
-print("group 4 final evaluation results")
-print("="*30)
+print("group 4 final evaluation results\n")
+plt.figure(figsize=(10, 8))
 
 for m_name in models:
     if os.path.exists(m_name):
@@ -30,6 +30,8 @@ for m_name in models:
         
         #auc stands for area under the curve. a score of 0.5 means 50/50 and 1.0 means it is perfect.
         auc_score = roc_auc_score(y_test, y_probs)
+        fpr, tpr, _ = roc_curve(y_test, y_probs)
+        plt.plot(fpr, tpr, label=f"{m_name} (auc = {auc_score:.4f})")
         print(f"\narchitecture variant: {m_name}")
         print(f"final test roc-auc: {auc_score:.4f}")
         
@@ -37,4 +39,11 @@ for m_name in models:
         y_pred = (y_probs > 0.5).astype(int)
         print(classification_report(y_test, y_pred, target_names=["no diabetes", "diabetes"]))
     else:
-        print(f"\nmissing file error: i could not find the file named {m_name} in this folder. double check your file explorer and make sure you renamed the best-model files correctly after each training run.")
+        print(f"\nmissing file error: could not find the file named {m_name} in this folder")
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlabel('false positive rate')
+plt.ylabel('true positive rate')
+plt.title('sprint 2 - model comparison (roc curves)')
+plt.legend()
+plt.savefig('sprint2_roc_comparison.png')
+print("\nsaved as 'sprint2_roc_comparison.png'")
