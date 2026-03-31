@@ -1,7 +1,9 @@
 *.csv
 .venv/
+data/
 *.egg-info/
 build/
 __pycache__/
 .ipynb_checkpoints/
 *.keras
+*.png
