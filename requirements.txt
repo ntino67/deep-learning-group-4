@@ -1,8 +1,9 @@
-tensorflow
-scikit-learn
-matplotlib
-pandas
-seaborn
-pytest
-kagglehub
-shap
+tensorflow==2.21.0
+scikit-learn==1.8.0
+matplotlib==3.10.8
+pandas==3.0.1
+seaborn==0.13.2
+pytest==9.0.2
+kagglehub==1.0.0
+shap==0.51.0
+ruff==0.15.8
