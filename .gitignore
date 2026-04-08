@@ -1,5 +1,7 @@
 *.csv
 .venv/
+venv/
+.vscode/
 data/
 *.egg-info/
 build/

@@ -5,7 +5,7 @@ import pandas as pd
 from keras import Model, Sequential, callbacks, regularizers
 from keras.callbacks import EarlyStopping, History, ModelCheckpoint
 from keras.layers import BatchNormalization, Dense, Dropout, Input
-from keras.metrics import Precision, Recall
+from keras.metrics import Precision, Recall, AUC
 from sklearn.utils.class_weight import compute_class_weight
 
 
@@ -108,7 +108,12 @@ def compile_model(model: Model) -> Model:
     model.compile(
         loss="binary_crossentropy",
         optimizer="adam",
-        metrics=["accuracy", Recall(), Precision()],
+        metrics=[
+            "accuracy",
+            Recall(name="recall"),
+            Precision(name="precision"),
+            AUC(name="auc"),
+        ],
     )
     return model
 

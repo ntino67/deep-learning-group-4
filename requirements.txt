@@ -7,3 +7,4 @@ pytest==9.0.2
 kagglehub==1.0.0
 shap==0.51.0
 ruff==0.15.8
+numpy==2.4.3
