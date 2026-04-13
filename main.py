@@ -19,6 +19,7 @@ from src.config import (
     SOURCE,
     TARGET,
 )
+from src.final_eval import evaluate
 from src.model import create_model
 
 
@@ -37,7 +38,7 @@ def main() -> None:
     )
 
     args = parse_args()
-    create_model(
+    model, history = create_model(
         X_train,
         X_val,
         y_train,
@@ -47,6 +48,9 @@ def main() -> None:
         dropout_rate=args.dropout_rate,
         l2_lambda=args.l2_lambda,
     )
+
+    if args.evaluate:
+        evaluate(X_test, y_test, threshold=args.threshold)
 
 
 def parse_args():
@@ -69,6 +73,18 @@ def parse_args():
         type=float,
         default=0.001,
         help="L2 regularization lambda (used with regularization and complete models)",
+    )
+    parser.add_argument(
+        "--threshold",
+        type=float,
+        defautl=0.35,
+        help="Decision threshold of the classification",
+    )
+    parser.add_argument(
+        "--evaluate",
+        type=bool,
+        default=False,
+        help="Decide if you display the evaluation",
     )
     return parser.parse_args()
 

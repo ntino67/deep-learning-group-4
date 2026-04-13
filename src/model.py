@@ -5,7 +5,7 @@ import pandas as pd
 from keras import Model, Sequential, callbacks, regularizers
 from keras.callbacks import EarlyStopping, History, ModelCheckpoint
 from keras.layers import BatchNormalization, Dense, Dropout, Input
-from keras.metrics import Precision, Recall, AUC
+from keras.metrics import AUC, Precision, Recall
 from sklearn.utils.class_weight import compute_class_weight
 
 
