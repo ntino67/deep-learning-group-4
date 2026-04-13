@@ -77,14 +77,13 @@ def parse_args():
     parser.add_argument(
         "--threshold",
         type=float,
-        defautl=0.35,
+        default=0.35,
         help="Decision threshold of the classification",
     )
     parser.add_argument(
         "--evaluate",
-        type=bool,
-        default=False,
-        help="Decide if you display the evaluation",
+        action="store_true",
+        help="Run evaluation after training",
     )
     return parser.parse_args()
 
