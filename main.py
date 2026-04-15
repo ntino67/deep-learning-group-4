@@ -45,6 +45,7 @@ def main() -> None:
         y_val,
         args.model_type,
         "best-model.keras",
+        args.imbalance_method,
         dropout_rate=args.dropout_rate,
         l2_lambda=args.l2_lambda,
     )
@@ -84,6 +85,13 @@ def parse_args():
         "--evaluate",
         action="store_true",
         help="Run evaluation after training",
+    )
+    parser.add_argument(
+        "--imbalance-method",
+        type=str,
+        default="class_weight",
+        choices=["class_weight", "smote"],
+        help="Choose between class_weight and SMOTE",
     )
     return parser.parse_args()
 

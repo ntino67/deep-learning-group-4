@@ -7,6 +7,7 @@ from keras.callbacks import EarlyStopping, History, ModelCheckpoint
 from keras.layers import BatchNormalization, Dense, Dropout, Input
 from keras.metrics import AUC, Precision, Recall
 from sklearn.utils.class_weight import compute_class_weight
+from imblearn.over_sampling import SMOTE
 
 
 def create_model(
@@ -16,6 +17,7 @@ def create_model(
     y_val: pd.Series,
     model_type: str,
     checkpoint_path: str,
+    imbalance_method ="class_weight",
     dropout_rate: float = 0.3,
     l2_lambda: float = 0.001,
 ) -> Tuple[Model, History]:
@@ -41,9 +43,18 @@ def create_model(
 
     model_callbacks = build_callbacks(checkpoint_path)
 
-    # compute class weight due in case the target feauture is imbalanced
-    weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
-    class_weight = {i: weights[i] for i in range(len(weights))}
+    class_weight = None
+
+    if imbalance_method == "class_weight":
+        weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
+        class_weight = dict(zip(np.unique(y_train), weights))
+
+    elif imbalance_method == "smote":
+        smote = SMOTE(random_state=42)
+        X_train, y_train = smote.fit_resample(X_train, y_train)
+
+    elif imbalance_method == "none":
+        pass
 
     history = train_model(
         model, X_train, X_val, y_train, y_val, model_callbacks, class_weight
