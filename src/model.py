@@ -30,6 +30,8 @@ def create_model(
             model = build_dropout_model(input_dim, dropout_rate)
         case "complete":
             model = build_complete_model(input_dim, dropout_rate, l2_lambda)
+        case "advanced":
+            model = build_advanced_model(input_dim, dropout_rate, l2_lambda)
         case _:
             raise ValueError(
                 f"Invalid model type: {model_type}: Please choose from option 1 to 4."
@@ -103,6 +105,24 @@ def build_complete_model(
         ]
     )
 
+def build_advanced_model(
+    input_dim: int, dropout_rate: float = 0.3, l2_lambda: float = 0.001
+) -> Model:
+    return Sequential(
+        [
+            Input(shape=(input_dim,)),
+            Dense(128, activation="relu", kernel_regularizer=regularizers.l2(l2_lambda)),
+            BatchNormalization(),
+            Dropout(dropout_rate),
+            Dense(64, activation="relu", kernel_regularizer=regularizers.l2(l2_lambda)),
+            BatchNormalization(),
+            Dropout(dropout_rate),
+            Dense(32, activation="relu", kernel_regularizer=regularizers.l2(l2_lambda)),
+            BatchNormalization(),
+            Dropout(dropout_rate),
+            Dense(1, activation="sigmoid"),
+        ]
+    )
 
 def compile_model(model: Model) -> Model:
     model.compile(

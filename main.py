@@ -59,7 +59,7 @@ def parse_args():
         "--model-type",
         type=str,
         default="base",
-        choices=["base", "dropout", "regularization", "complete"],
+        choices=["base", "dropout", "regularization", "complete", "advanced"],
         help="Model architecture to use",
     )
     parser.add_argument(

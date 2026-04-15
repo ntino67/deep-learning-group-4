@@ -12,7 +12,7 @@ from src.config import *
 
 def evaluate(X_test_scaled: np.ndarray,
              y_test: pd.Series,
-             threshold: float = 0.35)
+             threshold: float = 0.35):
     # mvl stands for model version list. we put the names of the three saved keras files into this list so the script can just cycle through them automatically. this is way better than writing the same code three times.
     models = ["model_base.keras", "model_dropout.keras", "model_complete.keras"]
 
