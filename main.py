@@ -24,6 +24,8 @@ from src.model import create_model
 
 
 def main() -> None:
+    args = parse_args()
+
     os.makedirs("./data", exist_ok=True)
     file_path: str = "./data/diabetes_012_health_indicators_BRFSS2015.csv"
     if not os.path.exists(file_path):
@@ -37,7 +39,6 @@ def main() -> None:
         df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
     )
 
-    args = parse_args()
     model, history = create_model(
         X_train,
         X_val,

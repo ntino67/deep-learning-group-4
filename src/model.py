@@ -2,12 +2,12 @@ from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
+from imblearn.over_sampling import SMOTE
 from keras import Model, Sequential, callbacks, regularizers
 from keras.callbacks import EarlyStopping, History, ModelCheckpoint
 from keras.layers import BatchNormalization, Dense, Dropout, Input
 from keras.metrics import AUC, Precision, Recall
 from sklearn.utils.class_weight import compute_class_weight
-from imblearn.over_sampling import SMOTE
 
 
 def create_model(
@@ -17,7 +17,7 @@ def create_model(
     y_val: pd.Series,
     model_type: str,
     checkpoint_path: str,
-    imbalance_method ="class_weight",
+    imbalance_method="class_weight",
     dropout_rate: float = 0.3,
     l2_lambda: float = 0.001,
 ) -> Tuple[Model, History]:
@@ -36,7 +36,7 @@ def create_model(
             model = build_advanced_model(input_dim, dropout_rate, l2_lambda)
         case _:
             raise ValueError(
-                f"Invalid model type: {model_type}: Please choose from option 1 to 4."
+                f"Invalid model type: {model_type}: Please choose from option 1 to 5."
             )
 
     model = compile_model(model)
@@ -46,15 +46,14 @@ def create_model(
     class_weight = None
 
     if imbalance_method == "class_weight":
-        weights = compute_class_weight("balanced", classes=np.unique(y_train), y=y_train)
+        weights = compute_class_weight(
+            "balanced", classes=np.unique(y_train), y=y_train
+        )
         class_weight = dict(zip(np.unique(y_train), weights))
 
     elif imbalance_method == "smote":
         smote = SMOTE(random_state=42)
         X_train, y_train = smote.fit_resample(X_train, y_train)
-
-    elif imbalance_method == "none":
-        pass
 
     history = train_model(
         model, X_train, X_val, y_train, y_val, model_callbacks, class_weight
@@ -116,13 +115,16 @@ def build_complete_model(
         ]
     )
 
+
 def build_advanced_model(
     input_dim: int, dropout_rate: float = 0.3, l2_lambda: float = 0.001
 ) -> Model:
     return Sequential(
         [
             Input(shape=(input_dim,)),
-            Dense(128, activation="relu", kernel_regularizer=regularizers.l2(l2_lambda)),
+            Dense(
+                128, activation="relu", kernel_regularizer=regularizers.l2(l2_lambda)
+            ),
             BatchNormalization(),
             Dropout(dropout_rate),
             Dense(64, activation="relu", kernel_regularizer=regularizers.l2(l2_lambda)),
@@ -134,6 +136,7 @@ def build_advanced_model(
             Dense(1, activation="sigmoid"),
         ]
     )
+
 
 def compile_model(model: Model) -> Model:
     model.compile(
