@@ -4,6 +4,8 @@ import shutil
 
 import kagglehub
 import pandas as pd
+from codecarbon import EmissionsTracker
+
 import wandb
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
@@ -14,6 +16,7 @@ absl.logging.set_verbosity(absl.logging.ERROR)
 from src import load_or_preprocess
 from src.config import (
     BINARY_COLS,
+    COMBINATIONS,
     INT_COLS,
     OUTLIER_COLS,
     POSITIVE_VALUE,
@@ -42,40 +45,49 @@ def main() -> None:
         )
     )
 
-    run = wandb.init(
-        entity="matteo-heidelberger-cesi",
-        project="diabetes-prediction",
-        config={
-            "model_type": args.model_type,
-            "dropout_rate": args.dropout_rate,
-            "l2_lambda": args.l2_lambda,
-            "imbalance_method": args.imbalance_method,
-            "batch_size": 64,
-        },
-    )
+    if args.benchmark:
+        for model_type, imbalance_method, run_name in COMBINATIONS:
+            tracker = EmissionsTracker(log_level="error")
+            tracker.start()
 
-    model, history = create_model(
-        X_train,
-        X_val,
-        y_train,
-        y_val,
-        args.model_type,
-        "best-model.keras",
-        args.imbalance_method,
-        dropout_rate=args.dropout_rate,
-        l2_lambda=args.l2_lambda,
-    )
+            run = wandb.init(
+                entity="matteo-heidelberger-cesi",
+                project="diabetes-prediction",
+                name=run_name,
+                config={
+                    "model_type": model_type,
+                    "dropout_rate": args.dropout_rate,
+                    "l2_lambda": args.l2_lambda,
+                    "imbalance_method": imbalance_method,
+                    "batch_size": 64,
+                },
+            )
 
-    run.log(
-        {
-            "val_loss": min(history.history["val_loss"]),
-            "val_recall": max(history.history["val_recall"]),
-            "val_precision": max(history.history["val_precision"]),
-            "val_auc": max(history.history["val_auc"]),
-        }
-    )
+            model, history = create_model(
+                X_train,
+                X_val,
+                y_train,
+                y_val,
+                model_type,
+                f"{run_name}.keras",
+                imbalance_method,
+                dropout_rate=args.dropout_rate,
+                l2_lambda=args.l2_lambda,
+            )
 
-    run.finish()
+            emissions = tracker.stop()
+
+            run.log(
+                {
+                    "val_loss": min(history.history["val_loss"]),
+                    "val_recall": max(history.history["val_recall"]),
+                    "val_precision": max(history.history["val_precision"]),
+                    "val_auc": max(history.history["val_auc"]),
+                    "carbon_emissions_kg": emissions,
+                }
+            )
+
+            run.finish()
 
     if args.evaluate:
         evaluate(X_test, y_test, threshold=args.threshold)
@@ -119,6 +131,11 @@ def parse_args():
         default="class_weight",
         choices=["class_weight", "smote"],
         help="Choose between class_weight and SMOTE",
+    )
+    parser.add_argument(
+        "--benchmark",
+        action="store_true",
+        help="Launch the benchmark",
     )
     return parser.parse_args()
 
