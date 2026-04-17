@@ -4,13 +4,14 @@ import shutil
 
 import kagglehub
 import pandas as pd
+import wandb
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 import absl.logging
 
 absl.logging.set_verbosity(absl.logging.ERROR)
 
-from src import preprocessing
+from src import load_or_preprocess
 from src.config import (
     BINARY_COLS,
     INT_COLS,
@@ -35,8 +36,22 @@ def main() -> None:
         src: str = os.path.join(path, "diabetes_012_health_indicators_BRFSS2015.csv")
         shutil.move(src, file_path)
     df: pd.DataFrame = pd.read_csv(file_path)
-    X_train, X_val, X_test, y_train, y_val, y_test = preprocessing.preprocessing(
-        df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
+    X_train, X_val, X_test, y_train, y_val, y_test = (
+        load_or_preprocess.load_or_preprocess(
+            df, SOURCE, TARGET, POSITIVE_VALUE, BINARY_COLS, INT_COLS, OUTLIER_COLS
+        )
+    )
+
+    run = wandb.init(
+        entity="matteo-heidelberger-cesi",
+        project="diabetes-prediction",
+        config={
+            "model_type": args.model_type,
+            "dropout_rate": args.dropout_rate,
+            "l2_lambda": args.l2_lambda,
+            "imbalance_method": args.imbalance_method,
+            "batch_size": 64,
+        },
     )
 
     model, history = create_model(
@@ -50,6 +65,17 @@ def main() -> None:
         dropout_rate=args.dropout_rate,
         l2_lambda=args.l2_lambda,
     )
+
+    run.log(
+        {
+            "val_loss": min(history.history["val_loss"]),
+            "val_recall": max(history.history["val_recall"]),
+            "val_precision": max(history.history["val_precision"]),
+            "val_auc": max(history.history["val_auc"]),
+        }
+    )
+
+    run.finish()
 
     if args.evaluate:
         evaluate(X_test, y_test, threshold=args.threshold)
